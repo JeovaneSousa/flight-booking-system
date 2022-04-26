@@ -2,6 +2,7 @@ package Model;
 
 import Service.BookingSystem;
 import Service.Flight;
+import Service.FlightLog;
 
 
 import java.util.LinkedList;
@@ -20,14 +21,21 @@ public class RegisteredClient extends Client {
         this.bookedFlights = new LinkedList();
     }
 
-    public void bookFlight(Integer code, BookingSystem bookingSystem) {
-        this.bookedFlights.add(bookingSystem.getFlightList().get(code));
+    public void bookFlight(Integer flightCode, BookingSystem bookingSystem) {
 
-        String departureCity = bookingSystem.getFlightList().get(code).getDepartureCity();
-        String destinationCity = bookingSystem.getFlightList().get(code).getDestinationCity();
-        double ticketPrice = bookingSystem.getFlightList().get(code).getTicketPrice();
+        if (bookingSystem.getFlightList().containsKey(flightCode)) {
 
-        bookingSystem.addToPurchaseLog(departureCity, destinationCity, ticketPrice);
+            this.bookedFlights.add(bookingSystem.getFlightList().get(flightCode));
+
+            String departureCity = bookingSystem.getFlightList().get(flightCode).getDepartureCity();
+            String destinationCity = bookingSystem.getFlightList().get(flightCode).getDestinationCity();
+            double ticketPrice = bookingSystem.getFlightList().get(flightCode).getTicketPrice();
+
+            bookingSystem.addToPurchaseLog(departureCity, destinationCity, ticketPrice);
+        }
+        else
+            System.out.println("There's no Flight assigned to this code.");
+
     }
 
     public void showBookedFlights() {
@@ -39,9 +47,19 @@ public class RegisteredClient extends Client {
         }
     }
 
-    public void cancelReservation(int code){
-        this.bookedFlights.remove(code -1);
-        this.showBookedFlights();
+    public void cancelReservation(int reservationIndex, BookingSystem bookingSystem) {
+        if ((reservationIndex > 0) && (reservationIndex <= this.bookedFlights.size())) {
+            String departureCity = this.bookedFlights.get(reservationIndex - 1).getDepartureCity();
+            String destinationCity = this.bookedFlights.get(reservationIndex - 1).getDestinationCity();
+            double ticketPrice = this.bookedFlights.get(reservationIndex - 1).getTicketPrice();
+            FlightLog mockLog = new FlightLog(departureCity,destinationCity,ticketPrice);
+            bookingSystem.getFlightLog().remove(mockLog);
+
+            this.bookedFlights.remove(reservationIndex - 1);
+            this.showBookedFlights();
+        }
+        else
+            System.out.println("There's no reservation assigned to this code.");
     }
     
     public int getLoginPin() {
@@ -52,9 +70,6 @@ public class RegisteredClient extends Client {
         return accountName;
     }
 
-    public List<Flight> getBookedFlights() {
-        return bookedFlights;
-    }
 }
 
 

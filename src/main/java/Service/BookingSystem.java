@@ -47,16 +47,27 @@ public class BookingSystem {
     }
 
     public void registerClient(String accountName, String cpf, int loginPin){
+        if (this.getClientList().containsKey(cpf)) {
+            System.out.println("The CPF number is already registered.");
+        }
+        else {
             RegisteredClient newClient = new RegisteredClient(accountName, cpf, loginPin);
             System.out.println("Great !\n");
             System.out.println("User created successfully! \n" +
-                               "Login: " + accountName + " and CPF: " + cpf);
+                    "Login: " + accountName + " and CPF: " + cpf);
             this.clientList.put(cpf,newClient);
+        }
     }
 
-    public RegisteredClient logIn(String loginCPF) {
-     System.out.println("Successfullly logged in. \n\n" + "Welcome, " + this.getClientList().get(loginCPF).getAccountName() + ". to Booking System for Registered Users. ");
-     return this.getClientList().get(loginCPF);
+    public RegisteredClient logIn(String loginCPF, int loginPin) {
+        if (this.getClientList().containsKey(loginCPF) && (this.getClientList().get(loginCPF).getLoginPin() == loginPin)){
+            System.out.println("Successfullly logged in. \n\n" + "Welcome, " + this.getClientList().get(loginCPF).getAccountName() + ". to Booking System for Registered Users. ");
+            return this.getClientList().get(loginCPF);
+        }
+        else{
+            System.out.println("Login failed. CPF or Pin number not found in our Database.");
+        }
+        return null;
     }
 
     public void addToPurchaseLog(String departureCity, String destinationCity, double tickerPrice){

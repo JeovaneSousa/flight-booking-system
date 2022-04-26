@@ -2,10 +2,16 @@ import Model.Client;
 import Model.RegisteredClient;
 import Model.UnregisteredClient;
 import Service.BookingSystem;
+import Service.FlightLog;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
 
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         String logo = "______             _    _               _____           _                 \n" +
                 "| ___ \\           | |  (_)             /  ___|         | |                \n" +
                 "| |_/ / ___   ___ | | ___ _ __   __ _  \\ `--. _   _ ___| |_ ___ _ __ ___  \n" +
@@ -61,13 +67,7 @@ public class Main {
                         System.out.print("Choose a login pin number sequence:");
                         int loginPin = Client.intInput();
 
-                            if (bookingSystem.getClientList().containsKey(cpf)) {
-                                System.out.println("The CPF number is already registered.");
-                            }
-                            else {
-                                bookingSystem.registerClient(accountName, cpf, loginPin);
-                            }
-                            
+                        bookingSystem.registerClient(accountName, cpf, loginPin);
                         Client.enterToContinue();
                         break;
                     }
@@ -77,14 +77,8 @@ public class Main {
                         System.out.print("Pin Number: ");
                         int loginPin = Client.intInput();
 
-                            if (bookingSystem.getClientList().containsKey(loginCPF) && (bookingSystem.getClientList().get(loginCPF).getLoginPin() == loginPin)){
-                                client = bookingSystem.logIn(loginCPF);
-                                logged = bookingSystem.logStatus(client);
-                            }
-                            else{
-                                System.out.println("Login failed. CPF or Pin number not found in our Database.");
-                            }
-
+                        client = bookingSystem.logIn(loginCPF, loginPin);
+                        logged = bookingSystem.logStatus(client);
                         Client.enterToContinue();
                         break;
                     }
@@ -119,13 +113,7 @@ public class Main {
                         System.out.print("\n\nWhich flight would you like to book? Type only the Flight code:");
                         int flightCode = Client.intInput();
 
-                            if (bookingSystem.getFlightList().containsKey(flightCode)){
-                                client.bookFlight(flightCode,bookingSystem);
-                            }
-                            else{
-                                System.out.println("There's no Flight assigned to this code.");
-                            }
-
+                        client.bookFlight(flightCode,bookingSystem);
                         Client.enterToContinue();
                         break;
                     }
@@ -134,11 +122,7 @@ public class Main {
                         System.out.print("\n\nWhich flight would you like to cancel? Type only it's code:");
                         int reservationIndex = Client.intInput();
 
-                            if ((reservationIndex > 0) && (reservationIndex <= client.getBookedFlights().size()))
-                                client.cancelReservation(reservationIndex);
-                            else
-                                System.out.println("There's no reservation assigned to this code.");
-
+                        client.cancelReservation(reservationIndex, bookingSystem);
                         Client.enterToContinue();
                         break;
                     }
@@ -161,7 +145,12 @@ public class Main {
                 }
             }
         }
-        System.out.println("Booking System Transactions log:");
-        System.out.println(bookingSystem.getFlightLog());
+        BufferedWriter writer = new BufferedWriter(new FileWriter("FlightLog.txt",false));
+        writer.write("Booking System Transactions log:\n");
+        for (FlightLog log : bookingSystem.getFlightLog()){
+            writer.write(log.toString());
+            writer.write("\n");
+        }
+        writer.close();
     }
 }
